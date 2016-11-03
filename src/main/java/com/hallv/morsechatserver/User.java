@@ -1,12 +1,18 @@
+package com.hallv.morsechatserver;
+
 
 import java.io.Serializable;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /*
@@ -27,6 +33,10 @@ public class User implements Serializable {
     @Id @GeneratedValue
     Long id;
     String userName, mail, password;
+    
+    @XmlTransient
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL)
+    List<Message> msgs;
     
     public User(){
     }

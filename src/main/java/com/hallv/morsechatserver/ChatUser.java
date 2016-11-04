@@ -28,8 +28,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 @Entity
-@Table (name = "User")
-public class User implements Serializable {
+@Table (name = "ChatUser")
+public class ChatUser implements Serializable {
     @Id @GeneratedValue
     Long id;
     String userName, mail, password;
@@ -38,9 +38,9 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL)
     List<Message> msgs;
     
-    public User(){
+    public ChatUser(){
     }
-    public User(String userName, String mail, String password){
+    public ChatUser(String userName, String mail, String password){
         this.userName = userName;
         this.mail = mail;
         this.password = password;
@@ -78,15 +78,15 @@ public class User implements Serializable {
         this.password = password;
     }
     
-    public static class UserAdapter extends XmlAdapter<Long, User> {
+    public static class UserAdapter extends XmlAdapter<Long, ChatUser> {
 
         @Override
-        public User unmarshal(Long v) throws Exception {
+        public ChatUser unmarshal(Long v) throws Exception {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
         @Override
-        public Long marshal(User v) throws Exception {
+        public Long marshal(ChatUser v) throws Exception {
                return v != null ? v.getId() : null;  
         }
     }

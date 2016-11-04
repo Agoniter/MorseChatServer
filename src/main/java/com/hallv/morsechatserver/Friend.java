@@ -30,16 +30,16 @@ public class Friend implements Serializable {
     @Id @GeneratedValue
     Long id;
    
-    User owner;
+    ChatUser owner;
     int confirmed;
     
-    @XmlJavaTypeAdapter(User.UserAdapter.class)
+    @XmlJavaTypeAdapter(ChatUser.UserAdapter.class)
     @OneToOne(optional = false, cascade = CascadeType.PERSIST)
-    User friend;
+    ChatUser friend;
     
     public Friend(){}
     
-    public Friend(User owner, int confirmed, User friend){
+    public Friend(ChatUser owner, int confirmed, ChatUser friend){
         this.owner = owner;
         this.confirmed = confirmed;
         this.friend = friend;
@@ -53,11 +53,11 @@ public class Friend implements Serializable {
         this.id = id;
     }
 
-    public User getOwner() {
+    public ChatUser getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public void setOwner(ChatUser owner) {
         this.owner = owner;
     }
 
@@ -69,11 +69,11 @@ public class Friend implements Serializable {
         this.confirmed = confirmed;
     }
 
-    public User getFriend() {
+    public ChatUser getFriend() {
         return friend;
     }
 
-    public void setFriend(User friend) {
+    public void setFriend(ChatUser friend) {
         this.friend = friend;
     }
     

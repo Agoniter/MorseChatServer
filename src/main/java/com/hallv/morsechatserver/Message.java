@@ -1,7 +1,7 @@
 package com.hallv.morsechatserver;
 
 
-import com.hallv.morsechatserver.User;
+import com.hallv.morsechatserver.ChatUser;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.CascadeType;
@@ -39,12 +39,12 @@ public class Message implements Serializable {
     @Temporal(javax.persistence.TemporalType.DATE)
     Date timestamp = new Date();
     
-    @XmlJavaTypeAdapter(User.UserAdapter.class)
+    @XmlJavaTypeAdapter(ChatUser.UserAdapter.class)
     @OneToOne(optional = false, cascade = CascadeType.PERSIST)
-    User recipient;
+    ChatUser recipient;
     public Message(){
     }
-    public Message(String message, User recipient){
+    public Message(String message, ChatUser recipient){
         this.message = message;
         this.recipient = recipient;
     }

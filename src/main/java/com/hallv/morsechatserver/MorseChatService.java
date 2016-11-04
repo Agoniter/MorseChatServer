@@ -10,7 +10,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -35,8 +34,9 @@ public class MorseChatService {
     @POST
     @Path("createuser")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createUser( User usr){
-        usr = new User();
+    public void createUser( ChatUser usr){
+        usr = new ChatUser();
         em.persist(usr);
     }
+    
 }

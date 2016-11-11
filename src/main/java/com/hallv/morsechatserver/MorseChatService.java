@@ -38,5 +38,14 @@ public class MorseChatService {
         usr = new ChatUser();
         em.persist(usr);
     }
+    @POST
+    @Path("sendMessage")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Message sendMessage(Message message){
+    message = new Message();
+    em.persist(message);
+    return message;
+    }
     
 }

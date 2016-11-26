@@ -51,5 +51,13 @@ public class MorseChatService {
                   .setParameter("recipientid",recipientid)
                   .getResultList();
     }
-    
+    @POST
+    @Path("user/addfriend")
+    public void addFriend(@QueryParam("ownerid") long ownerid,
+                          @QueryParam("friendid") long friendid  ){
+                ChatUser owner = em.getReference(ChatUser.class, ownerid);
+                ChatUser friend = em.getReference(ChatUser.class, friendid);
+                Friend newFriend = new Friend(owner, 0, friend);
+                em.persist(newFriend);
+    }
 }

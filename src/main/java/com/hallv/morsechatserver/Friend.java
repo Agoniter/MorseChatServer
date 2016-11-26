@@ -24,9 +24,12 @@ public class Friend implements Serializable {
     @Id @GeneratedValue
     Long id;
    
-    ChatUser owner;
+    
     int confirmed;
     
+    @XmlJavaTypeAdapter(ChatUser.UserAdapter.class)
+    @OneToOne(optional = false, cascade = CascadeType.PERSIST)
+    ChatUser owner;
     @XmlJavaTypeAdapter(ChatUser.UserAdapter.class)
     @OneToOne(optional = false, cascade = CascadeType.PERSIST)
     ChatUser friend;

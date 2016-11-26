@@ -5,11 +5,13 @@
  */
 package com.hallv.morsechatserver;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Vegard
  */
-public class Credentials {
+public class Credentials implements Serializable{
     private String username, password;
 
     public String getUsername() {

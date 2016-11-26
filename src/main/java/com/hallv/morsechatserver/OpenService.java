@@ -17,6 +17,16 @@ import javax.persistence.PersistenceContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
+import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
+import java.security.Key;
+import io.jsonwebtoken.*;
+import java.util.Date;    
+import java.util.List;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
 /**
  *
@@ -36,15 +46,10 @@ public class OpenService {
                              @QueryParam("username") String username) {
         ChatUser user = null;
         try {
-            byte[] salt = new byte[32];
             byte[] pass = password.getBytes("UTF-8");
-            RANDOM.nextBytes(salt);
-            byte[] saltedPass = new byte[salt.length + pass.length];
-            System.arraycopy(salt, 0, saltedPass, 0, salt.length);
-            System.arraycopy(pass, 0, saltedPass, salt.length, pass.length);
             
-            byte[] hash = MessageDigest.getInstance("SHA-256").digest(saltedPass);
-            user = new ChatUser(username, email, Base64.getEncoder().encodeToString(hash), salt);
+            byte[] hash = MessageDigest.getInstance("SHA-256").digest(pass);
+            user = new ChatUser(username, email, Base64.getEncoder().encodeToString(hash));
             em.persist(user);
             em.persist(new Group(Group.USER, username));
         } catch(Exception e) {
@@ -53,5 +58,69 @@ public class OpenService {
         
         return user != null ? user.toString() : "Error"; 
     }
+    
+    @POST
+    @Produces("application/json")
+    @Consumes("application/json")
+    public Response authenticateUser(Credentials credentials) {
+
+        String username = credentials.getUsername();
+        String password = credentials.getPassword();
+        try{
+            password = Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(credentials.getPassword().getBytes()));
+        }
+        catch(Exception e){
+            Logger.getLogger(OpenService.class.getName()).log(Level.SEVERE, "Failed to log in",e);
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+        }
+        
+        List<ChatUser> result = em.createQuery("select c from ChatUser where c.username = :uname and c.password = :psw").setParameter("uname", username).setParameter("psw",password).getResultList();
+        if(!result.isEmpty()){
+            String token = issueToken(username);
+            return Response.ok(token).build();
+        }
+        else{
+            return Response.status(Response.Status.CONFLICT).build();
+        }
+        // Authenticate the user, issue a token and return a response
+    }
+    
+    private String issueToken(String username) {
+        // Issue a token (can be a random String persisted to a database or a JWT token)
+        // The issued token must be associated to a user
+        // Return the issued token
+        
+        return createJWT(username, 7*24*60*60*1000);
+    }
+    
+    private String createJWT(String subject, long ttlMillis) {
+ 
+    //The JWT signature algorithm we will be using to sign the token
+    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+ 
+    long nowMillis = System.currentTimeMillis();
+    Date now = new Date(nowMillis);
+ 
+    //We will sign our JWT with our ApiKey secret
+    byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary("test");
+    Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
+ 
+    //Let's set the JWT Claims
+    JwtBuilder builder = Jwts.builder().setIssuedAt(now)
+                                .setSubject(subject)
+                                .signWith(signatureAlgorithm, signingKey);
+ 
+    //if it has been specified, let's add the expiration
+    if (ttlMillis >= 0) {
+    long expMillis = nowMillis + ttlMillis;
+        Date exp = new Date(expMillis);
+        builder.setExpiration(exp);
+    }
+ 
+    //Builds the JWT and serializes it to a compact, URL-safe string
+    return builder.compact();
+}
+    
+    
 }
 

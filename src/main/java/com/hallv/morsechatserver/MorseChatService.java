@@ -1,5 +1,6 @@
 package com.hallv.morsechatserver;
 
+import java.util.List;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -10,6 +11,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -31,21 +33,23 @@ public class MorseChatService {
     public String test(){
         return "Hello World!";
     }
+ 
     @POST
-    @Path("createuser")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void createUser( ChatUser usr){
-        usr = new ChatUser();
-        em.persist(usr);
-    }
-    @POST
-    @Path("sendMessage")
+    @Path("message/sendmessage")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Message sendMessage(Message message){
     message = new Message();
     em.persist(message);
     return message;
+    }
+    
+    @POST
+    @Path("message/getmessages")
+    public List<Message> getMessages(@QueryParam("recipientid") long recipientid){
+          return em.createQuery("select m from Message m where m.recipient.id = :recipientid",Message.class)
+                  .setParameter("recipientid",recipientid)
+                  .getResultList();
     }
     
 }

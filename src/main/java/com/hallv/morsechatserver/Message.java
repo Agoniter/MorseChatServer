@@ -37,16 +37,21 @@ public class Message implements Serializable {
     
     
     @Temporal(javax.persistence.TemporalType.DATE)
-    Date timestamp = new Date();
+    Date messageTimestamp = new Date();
     
     @XmlJavaTypeAdapter(ChatUser.UserAdapter.class)
     @OneToOne(optional = false, cascade = CascadeType.PERSIST)
     ChatUser recipient;
+    
+    @XmlJavaTypeAdapter(ChatUser.UserAdapter.class)
+    @OneToOne(optional = false, cascade = CascadeType.PERSIST)
+    ChatUser sender;
     public Message(){
     }
-    public Message(String message, ChatUser recipient){
+    public Message(String message, ChatUser recipient, ChatUser sender){
         this.message = message;
         this.recipient = recipient;
+        this.sender = sender;
     }
 
     public Long getId() {
@@ -66,11 +71,11 @@ public class Message implements Serializable {
     }
 
     public Date getTimestamp() {
-        return timestamp;
+        return messageTimestamp;
     }
 
     public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+        this.messageTimestamp = timestamp;
     }
     
 }

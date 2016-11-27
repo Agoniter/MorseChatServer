@@ -67,14 +67,16 @@ public class OpenService {
         String username = credentials.getUsername();
         String password = credentials.getPassword();
         try{
-            password = Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(credentials.getPassword().getBytes()));
+            password = Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(password.getBytes()));
         }
         catch(Exception e){
             Logger.getLogger(OpenService.class.getName()).log(Level.SEVERE, "Failed to log in",e);
             return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
         }
         
-        List<ChatUser> result = em.createQuery("select c from ChatUser where c.username = :uname and c.password = :psw").setParameter("uname", username).setParameter("psw",password).getResultList();
+        List<ChatUser> result = em.createQuery("select c from ChatUser c where c.username = :uname and c.password = :psw").setParameter("uname", username).setParameter("psw",password).getResultList();
+        
+        // Authenticate the user, issue a token and return a response
         if(!result.isEmpty()){
             String token = issueToken(username);
             return Response.ok(token).build();
@@ -82,14 +84,10 @@ public class OpenService {
         else{
             return Response.status(Response.Status.CONFLICT).build();
         }
-        // Authenticate the user, issue a token and return a response
+        
     }
     
     private String issueToken(String username) {
-        // Issue a token (can be a random String persisted to a database or a JWT token)
-        // The issued token must be associated to a user
-        // Return the issued token
-        
         return createJWT(username, 7*24*60*60*1000);
     }
     

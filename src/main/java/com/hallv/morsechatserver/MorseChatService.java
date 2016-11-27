@@ -1,5 +1,6 @@
 package com.hallv.morsechatserver;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
@@ -11,7 +12,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -46,9 +47,9 @@ public class MorseChatService {
     }
     @POST
     @Path("message/sendgroupmessage")
-    public Response sendGroupMessage(@QueryParam("senderid") long senderid,
-                                     @QueryParam("text") String text,
-                                     @QueryParam("recipientlist") List<Long> recipientList){
+    public Response sendGroupMessage(@FormParam("senderid") long senderid,
+                                     @FormParam("text") String text,
+                                     @FormParam("recipientlist") List<Long> recipientList){
                             ChatUser sender = em.getReference(ChatUser.class, senderid);
                             if(sender == null || recipientList.isEmpty()){
                                 return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
@@ -62,7 +63,7 @@ public class MorseChatService {
     }
     @POST
     @Path("message/getmessages")
-    public List<Message> getMessages(@QueryParam("recipientid") long recipientid){
+    public List<Message> getMessages(@FormParam("recipientid") long recipientid){
           return em.createQuery("select m from Message m where m.recipient.id = :recipientid",Message.class)
                   .setParameter("recipientid",recipientid)
                   .getResultList();
@@ -74,8 +75,8 @@ public class MorseChatService {
     }
     @POST
     @Path("user/addfriend")
-    public Response addFriend(@QueryParam("ownerid") long ownerid,
-                          @QueryParam("friendid") long friendid  ){
+    public Response addFriend(@FormParam("ownerid") long ownerid,
+                          @FormParam("friendid") long friendid  ){
                 ChatUser owner = em.getReference(ChatUser.class, ownerid);
                 ChatUser friend = em.getReference(ChatUser.class, friendid);
                 if(owner != null && friend != null){ 
@@ -90,8 +91,8 @@ public class MorseChatService {
                 
     @POST
     @Path("user/confirmfriend")
-    public Response confirmFriend(@QueryParam("ownerid") long ownerid,
-                              @QueryParam("friendid") long friendid){
+    public Response confirmFriend(@FormParam("ownerid") long ownerid,
+                              @FormParam("friendid") long friendid){
                 List<Friend> list= em.createQuery("select f from Friend f where f.owner.id = :ownerid and f.friend.id = :friendid",Friend.class)
                         .setParameter("ownerid",ownerid).setParameter("friendid",friendid).getResultList();
                  if(!list.isEmpty()){
@@ -103,5 +104,16 @@ public class MorseChatService {
                  else{
                  return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
                  }
+    }
+    @POST
+    @Path("user/showfriends")
+    public List<ChatUser> showFriends(@FormParam("ownerid") long ownerid){
+            List<Friend> friendZone = em.createQuery("Select f from Friend f where f.owner.id = :ownerid", Friend.class)
+                    .setParameter("ownerid",ownerid).getResultList();
+            ArrayList<ChatUser> friendList = new ArrayList<>();
+            for(Friend f : friendZone){
+                friendList.add(f.getFriend());
+            }
+            return friendList;
     }
 }

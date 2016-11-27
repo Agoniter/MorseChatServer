@@ -8,11 +8,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -30,7 +32,7 @@ public class MorseChatService {
     @Resource(mappedName ="jdbc/MorseChat")
     DataSource dataSource;
     
-
+    
     @POST
     @Secured
     @Path("message/sendmessage")
@@ -57,18 +59,30 @@ public class MorseChatService {
                             }
                             return Response.ok().build();
     }
-    @POST
-    @Path("message/getmessages")
-    public List<Message> getMessages(@FormParam("recipientid") long recipientid){
+    @GET
+    @Path("message/messages")
+    public List<Message> getMessages(@QueryParam("recipientid") long recipientid){
           return em.createQuery("select m from Message m where m.recipient.id = :recipientid",Message.class)
                   .setParameter("recipientid",recipientid)
                   .getResultList();
     }
-    @POST
-    @Path("user/getUsers")
+    @GET
+    @Path("user/all")
     public List<ChatUser> getUsers(){
         return em.createQuery("select c from ChatUser c", ChatUser.class).getResultList();
     }
+    
+    @DELETE
+    @Path("message/delete")
+    public Response deleteMessage(@FormParam("messageid") long messageid){
+        Message msg = em.getReference(Message.class,messageid);
+        if(msg != null){
+            em.remove(msg);
+            return Response.ok().build();
+        }
+        return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+    
     @POST
     @Path("user/addfriend")
     public Response addFriend(@FormParam("ownerid") long ownerid,
@@ -80,9 +94,7 @@ public class MorseChatService {
                 em.persist(newFriend);
                 return Response.ok().build();
                 }
-                else{
                 return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
-                }
     }
                 
     @POST
@@ -101,9 +113,9 @@ public class MorseChatService {
                  return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
                  }
     }
-    @POST
-    @Path("user/showfriends")
-    public List<ChatUser> showFriends(@FormParam("ownerid") long ownerid){
+    @GET
+    @Path("user/friends")
+    public List<ChatUser> showFriends(@QueryParam("ownerid") long ownerid){
             List<Friend> friendZone = em.createQuery("Select f from Friend f where f.owner.id = :ownerid", Friend.class)
                     .setParameter("ownerid",ownerid).getResultList();
             ArrayList<ChatUser> friendList = new ArrayList<>();

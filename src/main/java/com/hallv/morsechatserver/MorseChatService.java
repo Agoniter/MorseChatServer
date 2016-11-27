@@ -30,12 +30,7 @@ public class MorseChatService {
     @Resource(mappedName ="jdbc/MorseChat")
     DataSource dataSource;
     
-    @GET
-    @Path("test")
-    public String test(){
-        return "Hello World!";
-    }
- 
+
     @POST
     @Path("message/sendmessage")
     @Consumes(MediaType.APPLICATION_JSON)

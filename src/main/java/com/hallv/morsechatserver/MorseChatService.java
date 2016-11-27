@@ -44,9 +44,10 @@ public class MorseChatService {
     return message;
     }
     @POST
+    @Secured
     @Path("message/sendgroupmessage")
     public Response sendGroupMessage(@FormParam("senderid") long senderid,
-                                     @FormParam("text") String text,
+                                     @FormParam("message") ArrayList<Long> message,
                                      @FormParam("recipientlist") List<Long> recipientList){
                             ChatUser sender = em.getReference(ChatUser.class, senderid);
                             if(sender == null || recipientList.isEmpty()){
@@ -54,12 +55,13 @@ public class MorseChatService {
                             }
                             for(long i : recipientList){
                                 ChatUser recipient = em.getReference(ChatUser.class, i);
-                                Message msg = new Message(text, recipient,sender);
+                                Message msg = new Message(message, recipient,sender);
                                 em.persist(msg);
                             }
                             return Response.ok().build();
     }
     @GET
+    @Secured
     @Path("message/messages")
     public List<Message> getMessages(@QueryParam("recipientid") long recipientid){
           return em.createQuery("select m from Message m where m.recipient.id = :recipientid",Message.class)
@@ -67,12 +69,14 @@ public class MorseChatService {
                   .getResultList();
     }
     @GET
+    @Secured
     @Path("user/all")
     public List<ChatUser> getUsers(){
         return em.createQuery("select c from ChatUser c", ChatUser.class).getResultList();
     }
     
     @DELETE
+    @Secured
     @Path("message/delete")
     public Response deleteMessage(@FormParam("messageid") long messageid){
         Message msg = em.getReference(Message.class,messageid);
@@ -84,6 +88,7 @@ public class MorseChatService {
     }
     
     @POST
+    @Secured
     @Path("user/addfriend")
     public Response addFriend(@FormParam("ownerid") long ownerid,
                           @FormParam("friendid") long friendid  ){
@@ -98,6 +103,7 @@ public class MorseChatService {
     }
                 
     @POST
+    @Secured
     @Path("user/confirmfriend")
     public Response confirmFriend(@FormParam("ownerid") long ownerid,
                               @FormParam("friendid") long friendid){
@@ -114,6 +120,7 @@ public class MorseChatService {
                  }
     }
     @GET
+    @Secured
     @Path("user/friends")
     public List<ChatUser> showFriends(@QueryParam("ownerid") long ownerid){
             List<Friend> friendZone = em.createQuery("Select f from Friend f where f.owner.id = :ownerid", Friend.class)

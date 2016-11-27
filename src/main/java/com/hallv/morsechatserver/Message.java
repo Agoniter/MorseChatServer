@@ -3,6 +3,7 @@ package com.hallv.morsechatserver;
 
 import com.hallv.morsechatserver.ChatUser;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -33,7 +34,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public class Message implements Serializable {
     @Id @GeneratedValue
     Long id;
-    String message;
+    ArrayList<Long> message;
     
     
     @Temporal(javax.persistence.TemporalType.DATE)
@@ -48,7 +49,7 @@ public class Message implements Serializable {
     ChatUser sender;
     public Message(){
     }
-    public Message(String message, ChatUser recipient, ChatUser sender){
+    public Message(ArrayList<Long> message, ChatUser recipient, ChatUser sender){
         this.message = message;
         this.recipient = recipient;
         this.sender = sender;
@@ -61,21 +62,37 @@ public class Message implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
-
-    public String getMessage() {
+   
+    public ArrayList<Long> getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
+    public void setMessage(ArrayList<Long> message) {
         this.message = message;
     }
 
-    public Date getTimestamp() {
+    public Date getMessageTimestamp() {
         return messageTimestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.messageTimestamp = timestamp;
+    public void setMessageTimestamp(Date messageTimestamp) {
+        this.messageTimestamp = messageTimestamp;
+    }
+
+    public ChatUser getRecipient() {
+        return recipient;
+    }
+
+    public void setRecipient(ChatUser recipient) {
+        this.recipient = recipient;
+    }
+
+    public ChatUser getSender() {
+        return sender;
+    }
+
+    public void setSender(ChatUser sender) {
+        this.sender = sender;
     }
     
 }

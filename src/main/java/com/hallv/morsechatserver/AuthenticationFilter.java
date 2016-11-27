@@ -1,3 +1,4 @@
+package com.hallv.morsechatserver;
 
 import java.io.IOException;
 import javax.annotation.Priority;
@@ -43,7 +44,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 Response.status(Response.Status.UNAUTHORIZED).build());
         }
     }
-
     private void validateToken(String token) throws Exception {
         Claims claims = Jwts.parser()         
        .setSigningKey(DatatypeConverter.parseBase64Binary("test"))

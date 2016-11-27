@@ -32,6 +32,7 @@ public class MorseChatService {
     
 
     @POST
+    @Secured
     @Path("message/sendmessage")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

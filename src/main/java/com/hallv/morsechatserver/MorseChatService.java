@@ -152,6 +152,7 @@ public class MorseChatService {
 
     
     @POST
+    @Path("user/create")
     public String createUser(@FormParam("email")String email,
                              @FormParam("password")String password,
                              @FormParam("username") String username) {
@@ -164,13 +165,14 @@ public class MorseChatService {
             em.persist(user);
             em.persist(new Group(Group.USER, username));
         } catch(Exception e) {
-            Logger.getLogger(OpenService.class.getName()).log(Level.SEVERE, "Failed to add user",e);
+            Logger.getLogger(MorseChatService.class.getName()).log(Level.SEVERE, "Failed to add user",e);
         }
         
         return user != null ? user.toString() : "Error"; 
     }
     
     @POST
+    @Path("user/login")
     public Response authenticateUser(@FormParam("username") String username,
                                      @FormParam("password") String password) {
 
@@ -178,7 +180,7 @@ public class MorseChatService {
             password = Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(password.getBytes()));
         }
         catch(Exception e){
-            Logger.getLogger(OpenService.class.getName()).log(Level.SEVERE, "Failed to log in",e);
+            Logger.getLogger(MorseChatService.class.getName()).log(Level.SEVERE, "Failed to log in",e);
             return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
         }
         

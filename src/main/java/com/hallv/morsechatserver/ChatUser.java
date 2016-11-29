@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class ChatUser implements Serializable {
     @Id @GeneratedValue
     Long id;
-    String username, mail, password;
+    String username, mail, password,token;
     
     @XmlTransient
     @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL)
@@ -76,6 +76,14 @@ public class ChatUser implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
     
     public static class UserAdapter extends XmlAdapter<Long, ChatUser> {

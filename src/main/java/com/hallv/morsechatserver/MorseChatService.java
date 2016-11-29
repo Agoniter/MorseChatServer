@@ -55,6 +55,13 @@ public class MorseChatService {
         em.persist(tmp);
         return Response.ok("Good shiet").build();
     }
+    
+    @GET
+    @Secured
+    @Path("debug/checktoken")
+    public Response dbgToken(){
+        return Response.ok("User is authenticated").build();
+    }
     @GET
     @Path("debug/checkuser")
     public Response checkUsr(){
@@ -129,7 +136,7 @@ public class MorseChatService {
     
     @POST
     @Secured
-    @Path("user/addfriend")
+    @Path("user/add")
     public Response addFriend(@FormParam("ownerid") long ownerid,
                           @FormParam("friendid") long friendid  ){
                 ChatUser owner = em.getReference(ChatUser.class, ownerid);
@@ -144,7 +151,7 @@ public class MorseChatService {
                 
     @POST
     @Secured
-    @Path("user/confirmfriend")
+    @Path("user/confirm")
     public Response confirmFriend(@FormParam("ownerid") long ownerid,
                               @FormParam("friendid") long friendid){
                 List<Friend> list= em.createQuery("select f from Friend f where f.owner.id = :ownerid and f.friend.id = :friendid",Friend.class)
@@ -171,7 +178,14 @@ public class MorseChatService {
             }
        return friendList;
     }
-    
+    @GET
+    @Secured
+    @Path("user/search")
+    public List<ChatUser> userSearch(@QueryParam("searchstring") String searchString){
+        List<ChatUser> userSearch = em.createQuery("Select c from ChatUser c where c.username like :searchString").setParameter("searchString", searchString)
+                .getResultList();
+                return userSearch;
+    }
 
     
     @POST
@@ -195,7 +209,8 @@ public class MorseChatService {
     
     @POST
     @Path("user/login")
-    public Response authenticateUser(@FormParam("username") String username,
+    @Produces("application/json")
+    public ChatUser authenticateUser(@FormParam("username") String username,
                                      @FormParam("password") String password) {
 
         try{
@@ -203,20 +218,18 @@ public class MorseChatService {
         }
         catch(Exception e){
             Logger.getLogger(MorseChatService.class.getName()).log(Level.SEVERE, "Failed to log in",e);
-            return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
         }
         
         List<ChatUser> result = em.createQuery("select c from ChatUser c where c.username = :uname and c.password = :psw").setParameter("uname", username).setParameter("psw",password).getResultList();
         
         // Authenticate the user, issue a token and return a response
         if(!result.isEmpty()){
+            ChatUser tmp = result.get(0);
             String token = issueToken(username);
-            return Response.ok(token).build();
+            tmp.setToken(token);
+            return tmp;
         }
-        else{
-            return Response.status(Response.Status.CONFLICT).build();
-        }
-        
+        return null; 
     }
     
     private String issueToken(String username) {

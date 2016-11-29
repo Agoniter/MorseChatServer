@@ -30,7 +30,6 @@ public class MorseChatService {
     EntityManager em;
     
     @Resource(mappedName ="jdbc/MorseChat")
-    DataSource dataSource;
     
      
     @GET

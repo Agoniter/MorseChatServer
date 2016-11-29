@@ -9,11 +9,11 @@ import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -32,7 +32,13 @@ public class MorseChatService {
     @Resource(mappedName ="jdbc/MorseChat")
     DataSource dataSource;
     
-    
+     
+    @GET
+    @Path("test")
+    public Response test(){
+        return Response.ok("Hello World!").build();
+       
+    }
     @POST
     @Secured
     @Path("message/sendmessage")
@@ -43,23 +49,25 @@ public class MorseChatService {
     em.persist(message);
     return message;
     }
+    
     @POST
     @Secured
     @Path("message/sendgroupmessage")
-    public Response sendGroupMessage(@FormParam("senderid") long senderid,
-                                     @FormParam("message") ArrayList<Long> message,
-                                     @FormParam("recipientlist") List<Long> recipientList){
+    public Response sendGroupMessage(@QueryParam("senderid") long senderid,
+                                     @QueryParam("message") List<Long> message,
+                                     @QueryParam("recipientlist") List<Long> recipientList){
                             ChatUser sender = em.getReference(ChatUser.class, senderid);
                             if(sender == null || recipientList.isEmpty()){
                                 return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
                             }
                             for(long i : recipientList){
                                 ChatUser recipient = em.getReference(ChatUser.class, i);
-                                Message msg = new Message(message, recipient,sender);
+                                Message msg = new Message((ArrayList)message, recipient,sender);
                                 em.persist(msg);
                             }
                             return Response.ok().build();
     }
+
     @GET
     @Secured
     @Path("message/messages")

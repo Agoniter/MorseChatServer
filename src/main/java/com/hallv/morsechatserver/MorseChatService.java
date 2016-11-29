@@ -46,8 +46,31 @@ public class MorseChatService {
     @Path("test")
     public Response test(){
         return Response.ok("Hello World!").build();
-       
     }
+    
+    @GET
+    @Path("debug/createuser")
+    public Response dbgCrtUsr(){
+        ChatUser tmp = new ChatUser("hello", "plz", "work");
+        em.persist(tmp);
+        return Response.ok("Good shiet").build();
+    }
+    @GET
+    @Path("debug/checkuser")
+    public Response checkUsr(){
+        List<ChatUser> results = em.createQuery("select c from ChatUser c where c.username=:name").setParameter("name", "fuckwad").getResultList();
+        
+        if(!results.isEmpty()){
+            return Response.ok(results.get(0).getUsername()).build(); 
+        }
+        return Response.ok("User not found").build();
+
+    }
+    
+
+
+    
+    
     @POST
     @Secured
     @Path("message/sendmessage")
@@ -163,7 +186,6 @@ public class MorseChatService {
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(pass);
             user = new ChatUser(username, email, Base64.getEncoder().encodeToString(hash));
             em.persist(user);
-            em.persist(new Group(Group.USER, username));
         } catch(Exception e) {
             Logger.getLogger(MorseChatService.class.getName()).log(Level.SEVERE, "Failed to add user",e);
         }

@@ -76,25 +76,15 @@ public class MorseChatService {
     @POST
     @Secured
     @Path("message/sendmessage")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Message sendMessage(Message message){    
-    message = new Message();
-    em.persist(message);
-    return message;
-    }
-    
-    @POST
-    @Secured
-    @Path("message/sendgroupmessage")
+    @Consumes("application/json")
     public Response sendGroupMessage(@QueryParam("senderid") long senderid,
                                      @QueryParam("message") List<Long> message,
-                                     @QueryParam("recipientlist") List<Long> recipientList){
+                                     @QueryParam("recipients") List<Long> recipients){
                             ChatUser sender = em.getReference(ChatUser.class, senderid);
-                            if(sender == null || recipientList.isEmpty()){
+                            if(sender == null || recipients.isEmpty()){
                                 return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
                             }
-                            for(long i : recipientList){
+                            for(long i : recipients){
                                 ChatUser recipient = em.getReference(ChatUser.class, i);
                                 Message msg = new Message((ArrayList)message, recipient,sender);
                                 em.persist(msg);

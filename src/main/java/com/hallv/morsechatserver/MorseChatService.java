@@ -41,7 +41,6 @@ public class MorseChatService {
     
     @Resource(mappedName ="jdbc/MorseChat")
     
-     
     @GET
     @Path("test")
     public Response test(){
@@ -62,6 +61,7 @@ public class MorseChatService {
     public Response dbgToken(){
         return Response.ok("User is authenticated").build();
     }
+    
     @GET
     @Path("debug/checkuser")
     public Response checkUsr(){
@@ -71,12 +71,7 @@ public class MorseChatService {
             return Response.ok(results.get(0).getUsername()).build(); 
         }
         return Response.ok("User not found").build();
-
     }
-    
-
-
-    
     
     @POST
     @Secured
@@ -115,11 +110,16 @@ public class MorseChatService {
                   .setParameter("recipientid",recipientid)
                   .getResultList();
     }
+    
     @GET
     @Secured
     @Path("user/all")
     public List<ChatUser> getUsers(){
-        return em.createQuery("select c from ChatUser c", ChatUser.class).getResultList();
+        List<ChatUser> users = em.createQuery("select c from ChatUser c", ChatUser.class).getResultList();
+        for(ChatUser usr : users){
+            usr.clearConfInfo();
+        }
+        return users;
     }
     
     @DELETE
@@ -142,13 +142,13 @@ public class MorseChatService {
                 ChatUser owner = em.getReference(ChatUser.class, ownerid);
                 ChatUser friend = em.getReference(ChatUser.class, friendid);
                 if(owner != null && friend != null){ 
-                Friend newFriend = new Friend(owner, 0, friend);
+                Friend newFriend = new Friend(owner, 1, friend);
                 em.persist(newFriend);
                 return Response.ok().build();
                 }
                 return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
-                
+    /*            
     @POST
     @Secured
     @Path("user/confirm")
@@ -165,7 +165,7 @@ public class MorseChatService {
                  else{
                  return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
                  }
-    }
+    }*/
     @GET
     @Secured
     @Path("user/friends")
@@ -174,7 +174,9 @@ public class MorseChatService {
                     .setParameter("ownerid",ownerid).getResultList();
             ArrayList<ChatUser> friendList = new ArrayList<>();
             for(Friend f : friendZone){
-                friendList.add(f.getFriend());
+                ChatUser temp = f.getFriend();
+                temp.clearConfInfo();
+                friendList.add(temp);
             }
        return friendList;
     }
@@ -184,6 +186,9 @@ public class MorseChatService {
     public List<ChatUser> userSearch(@QueryParam("searchstring") String searchString){
         List<ChatUser> userSearch = em.createQuery("Select c from ChatUser c where c.username like :searchString").setParameter("searchString", searchString)
                 .getResultList();
+                for(ChatUser usr : userSearch){
+                    usr.clearConfInfo();
+                }
                 return userSearch;
     }
 

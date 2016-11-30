@@ -86,6 +86,11 @@ public class ChatUser implements Serializable {
         this.token = token;
     }
     
+    public void clearConfInfo(){
+        password = "";
+        token = "";
+    }
+    
     public static class UserAdapter extends XmlAdapter<Long, ChatUser> {
 
         @Override

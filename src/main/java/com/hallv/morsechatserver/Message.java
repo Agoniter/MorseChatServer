@@ -1,7 +1,8 @@
-package com.hallv.morsechatserver;
+ package com.hallv.morsechatserver;
 
 
 import com.hallv.morsechatserver.ChatUser;
+ 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;

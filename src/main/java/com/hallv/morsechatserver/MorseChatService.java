@@ -74,6 +74,13 @@ public class MorseChatService {
     }
     
     @GET
+    @Path("debug/cleanup")
+    public Response cleanup(){
+        int res = em.createQuery("delete from ChatUser where password=:empty").setParameter("empty", "").executeUpdate();
+        return Response.ok("Successfully removed " + res + " users without a password").build();
+    }
+    
+    @GET
     @Path("debug/fillmessages")
     public Response fillMsgs(@QueryParam("sender") String sender,
                              @QueryParam("recipient") String recipient){

@@ -86,7 +86,7 @@ public class MorseChatService {
                              @QueryParam("recipient") String recipient){
        
         List<ChatUser> senders = em.createQuery("select c from ChatUser c where c.username=:name").setParameter("name", sender).getResultList();
-        List<ChatUser> recipients = em.createQuery("select c from ChatUser c where c.username=:name").setParameter("name", sender).getResultList();
+        List<ChatUser> recipients = em.createQuery("select c from ChatUser c where c.username=:name").setParameter("name", recipient).getResultList();
         
         if(senders.isEmpty() || recipients.isEmpty()){
             return Response.ok("Recipient or sender not found").build();

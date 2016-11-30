@@ -73,6 +73,33 @@ public class MorseChatService {
         return Response.ok("User not found").build();
     }
     
+    @GET
+    @Path("debug/fillmessages")
+    public Response fillMsgs(@QueryParam("sender") String sender,
+                             @QueryParam("recipient") String recipient){
+       
+        List<ChatUser> senders = em.createQuery("select c from ChatUser c where c.username=:name").setParameter("name", sender).getResultList();
+        List<ChatUser> recipients = em.createQuery("select c from ChatUser c where c.username=:name").setParameter("name", sender).getResultList();
+        
+        if(senders.isEmpty() || recipients.isEmpty()){
+            return Response.ok("Recipient or sender not found").build();
+        }
+        ChatUser thisSender = senders.get(0);
+        ChatUser thisRecipient = senders.get(0);
+        
+        ArrayList<Long> msg = new ArrayList<>();
+        msg.add(200L);
+        msg.add(100L);
+        msg.add(100L);
+        msg.add(100L);
+        msg.add(200L);
+        
+        Message message = new Message(msg, thisRecipient, thisSender);
+        em.persist(message);
+        
+        return Response.ok().build();
+    }
+    
     @POST
     @Secured
     @Path("message/sendmessage")

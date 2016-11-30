@@ -76,8 +76,14 @@ public class MorseChatService {
     @GET
     @Path("debug/cleanup")
     public Response cleanup(){
+        List<ChatUser> result = em.createQuery("select c from ChatUser c where password=:empty").setParameter("empty","").getResultList();
         int res = em.createQuery("delete from ChatUser where password=:empty").setParameter("empty", "").executeUpdate();
-        return Response.ok("Successfully removed " + res + " users without a password").build();
+        int res2 = em.createQuery("delete from Message where sender=recipient").executeUpdate();
+        int res3 = 0;
+        for(ChatUser cUser : result){
+            res3 += em.createQuery("delete from Message where sender.id=:sndr or recipient.id=:recip").setParameter("sndr", cUser.getId()).setParameter("recip", cUser.getId()).executeUpdate();
+        }
+        return Response.ok("Successfully removed " + res + " users without a password, " + res2 + " messages with sender as recipient, and " + res3 + " messages belonging to the users without passwords").build();
     }
     
     @GET

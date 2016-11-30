@@ -64,11 +64,11 @@ public class MorseChatService {
     
     @GET
     @Path("debug/checkuser")
-    public Response checkUsr(){
-        List<ChatUser> results = em.createQuery("select c from ChatUser c where c.username=:name").setParameter("name", "fuckwad").getResultList();
+    public Response checkUsr(@QueryParam("user") String user){
+        List<ChatUser> results = em.createQuery("select c from ChatUser c where c.username=:name").setParameter("name", user).getResultList();
         
         if(!results.isEmpty()){
-            return Response.ok(results.get(0).getUsername()).build(); 
+            return Response.ok(results.get(0).getUsername() + " - " + results.get(0).getPassword()).build(); 
         }
         return Response.ok("User not found").build();
     }
@@ -92,7 +92,7 @@ public class MorseChatService {
             return Response.ok("Recipient or sender not found").build();
         }
         ChatUser thisSender = senders.get(0);
-        ChatUser thisRecipient = senders.get(0);
+        ChatUser thisRecipient = recipients.get(0);
         
         ArrayList<Long> msg = new ArrayList<>();
         msg.add(200L);
@@ -130,20 +130,27 @@ public class MorseChatService {
     @Secured
     @Path("message/messages")
     public List<Message> getMessages(@QueryParam("recipientid") long recipientid){
-          return em.createQuery("select m from Message m where m.recipient.id = :recipientid",Message.class)
+        return em.createQuery("select m from Message m where m.recipient.id = :recipientid",Message.class)
                   .setParameter("recipientid",recipientid)
                   .getResultList();
+
     }
     
     @GET
     @Secured
+    @Produces("application/json")
     @Path("user/all")
-    public List<ChatUser> getUsers(){
-        List<ChatUser> users = em.createQuery("select c from ChatUser c", ChatUser.class).getResultList();
+    public List<UserTrans> getUsers(@QueryParam("userid") long userid){
+        List<ChatUser> users = em.createQuery("select c from ChatUser c where c.id != :userid")
+                .setParameter("userid", userid).getResultList();
+        
+        List<UserTrans> userTmp = new ArrayList<>();
         for(ChatUser usr : users){
-            usr.clearConfInfo();
+            userTmp.add(new UserTrans(usr.getUsername(),usr.getId()));
         }
-        return users;
+        Logger.getLogger(MorseChatService.class.getName()).log(Level.SEVERE, "USERALL" + userTmp.get(0).username);
+
+        return userTmp;
     }
     
     @DELETE
@@ -248,7 +255,7 @@ public class MorseChatService {
         catch(Exception e){
             Logger.getLogger(MorseChatService.class.getName()).log(Level.SEVERE, "Failed to log in",e);
         }
-        
+        Logger.getLogger(MorseChatService.class.getName()).log(Level.INFO, username + " - " + password);
         List<ChatUser> result = em.createQuery("select c from ChatUser c where c.username = :uname and c.password = :psw").setParameter("uname", username).setParameter("psw",password).getResultList();
         
         // Authenticate the user, issue a token and return a response
@@ -258,7 +265,8 @@ public class MorseChatService {
             tmp.setToken(token);
             return tmp;
         }
-        return null; 
+        ChatUser error = new ChatUser("error", "error", "error");
+        return error; 
     }
     
     private String issueToken(String username) {

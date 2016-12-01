@@ -344,9 +344,7 @@ public class MorseChatService {
     public Response authenticateUserToken(@FormParam("token") String token){
         Claims claims = Jwts.parser()         
        .setSigningKey("test")
-       .parseClaimsJws(token).getBody();
-        System.out.println("Subject: " + claims.getSubject());
-        
+       .parseClaimsJws(token).getBody();        
         List<ChatUser> result = em.createQuery("select c from ChatUser c where c.username =:name").setParameter("name", claims.getSubject()).getResultList();
         if(result.isEmpty()){
             return Response.status(Response.Status.UNAUTHORIZED).build();

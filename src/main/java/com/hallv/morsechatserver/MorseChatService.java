@@ -1,5 +1,6 @@
 package com.hallv.morsechatserver;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -334,6 +335,23 @@ public class MorseChatService {
             return Response.ok(tmp).build();
         }
         return Response.status(Response.Status.UNAUTHORIZED).build(); 
+    }
+    
+    @POST
+    @Path("user/tokenlogin")
+    @Secured
+    @Produces("application/json")
+    public Response authenticateUserToken(@FormParam("token") String token){
+        Claims claims = Jwts.parser()         
+       .setSigningKey("test")
+       .parseClaimsJws(token).getBody();
+        System.out.println("Subject: " + claims.getSubject());
+        
+        List<ChatUser> result = em.createQuery("select c from ChatUser c where c.username =:name").setParameter("name", claims.getSubject()).getResultList();
+        if(result.isEmpty()){
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        return Response.ok(result.get(0)).build();
     }
     
     /**

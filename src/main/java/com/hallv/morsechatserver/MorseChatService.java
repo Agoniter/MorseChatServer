@@ -253,7 +253,7 @@ public class MorseChatService {
     @POST
     @Path("user/login")
     @Produces("application/json")
-    public ChatUser authenticateUser(@FormParam("username") String username,
+    public Response authenticateUser(@FormParam("username") String username,
                                      @FormParam("password") String password) {
 
         try{
@@ -270,10 +270,10 @@ public class MorseChatService {
             ChatUser tmp = result.get(0);
             String token = issueToken(username);
             tmp.setToken(token);
-            return tmp;
+            return Response.ok(tmp).build();
         }
         ChatUser error = new ChatUser("error", "error", "error");
-        return error; 
+        return Response.status(Response.Status.UNAUTHORIZED).build(); 
     }
     
     private String issueToken(String username) {

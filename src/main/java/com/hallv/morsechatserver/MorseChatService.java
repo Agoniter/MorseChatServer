@@ -170,7 +170,6 @@ public class MorseChatService {
         for(ChatUser usr : users){
             userTmp.add(new UserTrans(usr.getUsername(),usr.getId()));
         }
-        Logger.getLogger(MorseChatService.class.getName()).log(Level.SEVERE, "USERALL" + userTmp.get(0).username);
 
         return userTmp;
     }
@@ -319,7 +318,6 @@ public class MorseChatService {
         catch(Exception e){
             Logger.getLogger(MorseChatService.class.getName()).log(Level.SEVERE, "Failed to log in",e);
         }
-        Logger.getLogger(MorseChatService.class.getName()).log(Level.INFO, username + " - " + password);
         List<ChatUser> result = em.createQuery("select c from ChatUser c where c.username = :uname and c.password = :psw").setParameter("uname", username).setParameter("psw",password).getResultList();
         
         // Authenticate the user, issue a token and return a response

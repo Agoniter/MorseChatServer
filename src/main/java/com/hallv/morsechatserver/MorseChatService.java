@@ -183,13 +183,15 @@ public class MorseChatService {
     @DELETE
     @Secured
     @Path("message/delete")
-    public Response deleteMessage(@FormParam("messageid") long messageid){
-        Message msg = em.getReference(Message.class,messageid);
+    public Response deleteMessage(@QueryParam("messageid") long messageid){
+        /*Message msg = em.getReference(Message.class,messageid);
         if(msg != null){
             em.remove(msg);
             return Response.ok().build();
-        }
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+        }*/
+        int res = em.createQuery("delete from Message m where m.id=:messageid").setParameter("messageid", messageid).executeUpdate();
+        return Response.ok(res + "").build();
+        //return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
     
     /**

@@ -41,20 +41,20 @@ public class MorseChatService {
     
     @Resource(mappedName ="jdbc/MorseChat")
     
+    /**
+     * Basic test method to check if service is up and running
+     * @return  Response code 200 and "Hello World!"
+     */
     @GET
     @Path("test")
     public Response test(){
         return Response.ok("Hello World!").build();
     }
     
-    @GET
-    @Path("debug/createuser")
-    public Response dbgCrtUsr(){
-        ChatUser tmp = new ChatUser("hello", "plz", "work");
-        em.persist(tmp);
-        return Response.ok("Good shiet").build();
-    }
-    
+    /**
+     * Checks a users token, used for debugging
+     * @return  Response code 200 OK if authenticated, 401 Unauthorized if not.
+     */
     @GET
     @Secured
     @Path("debug/checktoken")
@@ -62,6 +62,11 @@ public class MorseChatService {
         return Response.ok("User is authenticated").build();
     }
     
+    /**
+     * Checks if a given user is in the database, used for debugging
+     * @param user  The username to check for in the database
+     * @return      Response code 200 OK, the string User not found if not found, the username if found.
+     */
     @GET
     @Path("debug/checkuser")
     public Response checkUsr(@QueryParam("user") String user){
@@ -73,19 +78,12 @@ public class MorseChatService {
         return Response.ok("User not found").build();
     }
     
-    @GET
-    @Path("debug/cleanup")
-    public Response cleanup(){
-        List<ChatUser> result = em.createQuery("select c from ChatUser c where password=:empty").setParameter("empty","").getResultList();
-        int res = em.createQuery("delete from ChatUser where password=:empty").setParameter("empty", "").executeUpdate();
-        int res2 = em.createQuery("delete from Message where sender=recipient").executeUpdate();
-        int res3 = 0;
-        for(ChatUser cUser : result){
-            res3 += em.createQuery("delete from Message where sender.id=:sndr or recipient.id=:recip").setParameter("sndr", cUser.getId()).setParameter("recip", cUser.getId()).executeUpdate();
-        }
-        return Response.ok("Successfully removed " + res + " users without a password, " + res2 + " messages with sender as recipient, and " + res3 + " messages belonging to the users without passwords").build();
-    }
-    
+    /**
+     * Adds a test message to a given user, from the specified sender. Used for debugging.
+     * @param sender    The username of the user that the message should be sent from.
+     * @param recipient The username of the user that should receive the message.
+     * @return          Response code 200 OK if successful at sending message, 503 Service Unavailable if something went wrong.
+     */
     @GET
     @Path("debug/fillmessages")
     public Response fillMsgs(@QueryParam("sender") String sender,
@@ -95,7 +93,7 @@ public class MorseChatService {
         List<ChatUser> recipients = em.createQuery("select c from ChatUser c where c.username=:name").setParameter("name", recipient).getResultList();
         
         if(senders.isEmpty() || recipients.isEmpty()){
-            return Response.ok("Recipient or sender not found").build();
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
         }
         ChatUser thisSender = senders.get(0);
         ChatUser thisRecipient = recipients.get(0);
@@ -113,6 +111,12 @@ public class MorseChatService {
         return Response.ok().build();
     }
     
+    /**
+     * Lets an authenticated user send a message.
+     * @param msgCont   An object with the message along with the recipients of the message.
+     * @see             MessageContainer
+     * @return          Response code 200 OK if successful at sending message, 503 Service Unavailable if something went wrong.
+     */
     @POST
     @Secured
     @Path("message/sendmessage")
@@ -133,6 +137,11 @@ public class MorseChatService {
                             return Response.ok().build();
     }
 
+    /**
+     * Gets all the messages of an authenticated user
+     * @param recipientid   The userID of the user who's messages should be retrieved.
+     * @return              The messages of the user.
+     */
     @GET
     @Secured
     @Path("message/messages")
@@ -143,6 +152,12 @@ public class MorseChatService {
 
     }
     
+    /**
+     * Gets all users in the database except for one (usually the logged in user)
+     * @param userid    The userID that shouldn't be returned
+     * @see             UserTrans
+     * @return          All users except the one specified.
+     */
     @GET
     @Secured
     @Produces("application/json")
@@ -160,6 +175,11 @@ public class MorseChatService {
         return userTmp;
     }
     
+    /**
+     * Deletes the specified message
+     * @param messageid The ID of the message that should be deleted
+     * @return          Response code 200 OK if successful, 503 Service Unavailable if failed.
+     */
     @DELETE
     @Secured
     @Path("message/delete")
@@ -172,9 +192,15 @@ public class MorseChatService {
         return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
     
+    /**
+     * Creates a friendship between the two users specified
+     * @param ownerid   The ID of the user initiating the friendship
+     * @param friendid  The ID of the user that is being befriended
+     * @return          Response code 200 OK if successful, 503 Service Unavailable if failed.
+     */
     @POST
     @Secured
-    @Path("user/add")
+    @Path("friend/add")
     public Response addFriend(@FormParam("ownerid") long ownerid,
                           @FormParam("friendid") long friendid  ){
                 ChatUser owner = em.getReference(ChatUser.class, ownerid);
@@ -189,7 +215,7 @@ public class MorseChatService {
     /*            
     @POST
     @Secured
-    @Path("user/confirm")
+    @Path("friend/confirm")
     public Response confirmFriend(@FormParam("ownerid") long ownerid,
                               @FormParam("friendid") long friendid){
                 List<Friend> list= em.createQuery("select f from Friend f where f.owner.id = :ownerid and f.friend.id = :friendid",Friend.class)
@@ -204,6 +230,12 @@ public class MorseChatService {
                  return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
                  }
     }*/
+    
+    /**
+     * Gets all the friends of a specified user
+     * @param ownerid   The user who's friends should be retrieved.
+     * @return          The friends.
+     */
     @GET
     @Secured
     @Path("user/friends")
@@ -218,22 +250,37 @@ public class MorseChatService {
             }
        return friendList;
     }
+    
+    /**
+     * Searches the database for a username that has a given string in it
+     * @param searchString  The string to search for.
+     * @see                 UserTrans
+     * @return              The users that match the search string
+     */
     @GET
     @Secured
     @Path("user/search")
-    public List<ChatUser> userSearch(@QueryParam("searchstring") String searchString){
+    public List<UserTrans> userSearch(@QueryParam("searchstring") String searchString){
         List<ChatUser> userSearch = em.createQuery("Select c from ChatUser c where c.username like :searchString").setParameter("searchString", searchString)
                 .getResultList();
+        
+                List<UserTrans> usrs = new ArrayList<>();
                 for(ChatUser usr : userSearch){
-                    usr.clearConfInfo();
+                    usrs.add(new UserTrans(usr.getUsername(),usr.getId()));
                 }
-                return userSearch;
+                return usrs;
     }
 
-    
+    /**
+     * Creates/registers a new user
+     * @param email     The email of the user
+     * @param password  The password (plaintext) of the user
+     * @param username  The username of the user
+     * @return          Response code 200 OK if successful, 503 Service Unavailable if failed.
+     */
     @POST
     @Path("user/create")
-    public String createUser(@FormParam("email")String email,
+    public Response createUser(@FormParam("email")String email,
                              @FormParam("password")String password,
                              @FormParam("username") String username) {
         ChatUser user = null;
@@ -243,13 +290,21 @@ public class MorseChatService {
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(pass);
             user = new ChatUser(username, email, Base64.getEncoder().encodeToString(hash));
             em.persist(user);
-        } catch(Exception e) {
+        } catch(Exception e) { 
             Logger.getLogger(MorseChatService.class.getName()).log(Level.SEVERE, "Failed to add user",e);
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
         }
         
-        return user != null ? user.toString() : "Error"; 
+        return Response.ok().build();
     }
     
+    
+    /**
+     * Logs a given user in
+     * @param username  The users username.
+     * @param password  The users password (plaintext).
+     * @return          The user information from the database, including a JWT (token) if successful. Response code 401 Unauthorized if login failed.
+     */
     @POST
     @Path("user/login")
     @Produces("application/json")
@@ -275,10 +330,21 @@ public class MorseChatService {
         return Response.status(Response.Status.UNAUTHORIZED).build(); 
     }
     
+    /**
+     * Creates a token for a user that expires in one week
+     * @param username  The username of the user
+     * @return          String representation of the token.
+     */
     private String issueToken(String username) {
         return createJWT(username, 7*24*60*60*1000);
     }
     
+    /**
+     * Generates the JWT (token)
+     * @param subject   The username of the user the token is for.
+     * @param ttlMillis Time to live in milliseconds
+     * @return          The token as a string.
+     */
     private String createJWT(String subject, long ttlMillis) {
 
         //The JWT signature algorithm we will be using to sign the token

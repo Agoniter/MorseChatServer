@@ -285,6 +285,12 @@ public class MorseChatService {
                              @FormParam("password")String password,
                              @FormParam("username") String username) {
         ChatUser user = null;
+        List<ChatUser> tmp = em.createQuery("select c from ChatUser c").getResultList();
+        for(ChatUser c: tmp){
+            if(c.getUsername().equals(username)){
+                return Response.status(Response.Status.NOT_ACCEPTABLE).build();
+            }
+        }
         try {
             byte[] pass = password.getBytes("UTF-8");
             

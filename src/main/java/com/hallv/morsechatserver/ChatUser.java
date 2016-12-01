@@ -1,6 +1,5 @@
 package com.hallv.morsechatserver;
 
-
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -15,15 +14,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- *
- * @author hallv
+ * Represents the user and stores all the information needed
+ * in the database.
+ * @author hallv, vegard
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)

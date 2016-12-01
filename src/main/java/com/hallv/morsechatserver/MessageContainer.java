@@ -10,7 +10,8 @@ import java.util.ArrayList;
  */
 
 /**
- *
+ * Container class for sending messages from client to server.
+ * Contains the message along with a list of recipients.
  * @author Vegard
  */
 public class MessageContainer implements Serializable{

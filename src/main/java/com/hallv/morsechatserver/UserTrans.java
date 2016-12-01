@@ -8,7 +8,8 @@ package com.hallv.morsechatserver;
 import java.io.Serializable;
 
 /**
- *
+ * Container class to transfer information about other users
+ * down to the client.
  * @author hallv
  */
 public class UserTrans implements Serializable {

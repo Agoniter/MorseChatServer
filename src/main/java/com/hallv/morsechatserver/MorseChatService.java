@@ -272,7 +272,6 @@ public class MorseChatService {
             tmp.setToken(token);
             return Response.ok(tmp).build();
         }
-        ChatUser error = new ChatUser("error", "error", "error");
         return Response.status(Response.Status.UNAUTHORIZED).build(); 
     }
     
